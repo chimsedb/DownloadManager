@@ -7,12 +7,18 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.bluetooth.le.AdvertiseData;
+import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -22,7 +28,10 @@ import android.widget.ListView;
 
 import com.downloader.PRDownloader;
 import com.downloader.PRDownloaderConfig;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 
@@ -30,8 +39,7 @@ public class MainActivity extends AppCompatActivity implements CommunicationAdap
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
 
-
-    public static ArrayList<ObItemjDownload> obItemjDownloads;
+    public ArrayList<ObItemjDownload> obItemjDownloads;
     private Button btnDownload;
     public int id = 0;
     public long process = 0;
@@ -40,7 +48,6 @@ public class MainActivity extends AppCompatActivity implements CommunicationAdap
 
     ListView listView;
     AdapterDownloadList adapterDownloadList;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,17 +68,20 @@ public class MainActivity extends AppCompatActivity implements CommunicationAdap
         adapterDownloadList.notifyDataSetChanged();
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        new AsyncService().execute();
-    }
 
     private void startServiceDownload() {
+        saveData();
         Intent intent = new Intent(this, ServiceDownload.class);
+        intent.putParcelableArrayListExtra("obItemjDownloads", obItemjDownloads);
         ContextCompat.startForegroundService(this, intent);
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        new AsynService().execute();
+        startServiceDownload();
+    }
 
     public void ConfigDownload() {
         PRDownloader.initialize(getApplicationContext());
@@ -83,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements CommunicationAdap
 
     private void createDialog() {
         final String url = "https://www.wallpaperup.com/uploads/wallpapers/2014/01/15/228439/9c3928b843a01ec6d3b796583a707704-1000.jpg";
-//        final String url = "https://c2-sd-vdc.nixcdn.com/PreNCT16/HayTraoChoAnh-SonTungMTPSnoopDoggMadisonBeer-6010701.mp4?st=x3eR3ruIUzAMasQ4S1NuvA&e=1565365100";
+//        final String url = "https://c2-sd-vdc.nixcdn.com/PreNCT10/ChapCanhUocMoKaraoke-V.A-4190063.mp4?st=zhvDR-3RgHMMBKSIDy4RgQ&e=1565930823";
 //        final String url = "https://c2-sd-vdc.nixcdn.com/GoNCT1/DauDau-Isaac-6036608.mp4?st=h0Uh5zFc3yUf5hJ8HY2nmA&e=1565365868";
         final AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
         final EditText et_input = new EditText(this);
@@ -102,8 +112,7 @@ public class MainActivity extends AppCompatActivity implements CommunicationAdap
                         et_url = et_input.getText().toString();
                         obItemjDownloads.add(new ObItemjDownload(et_url, 0, 0));
                         new AsyncGetInfoDownload().execute();
-
-                        adapterDownloadList.notifyDataSetChanged();
+//                        adapterDownloadList.notifyDataSetChanged();
                         dialog.dismiss();
 
                     }
@@ -111,12 +120,37 @@ public class MainActivity extends AppCompatActivity implements CommunicationAdap
         alertDialog.show();
     }
 
+    private void saveData() {
+        SharedPreferences shared_preference = getSharedPreferences("shared preference", MODE_PRIVATE);
+        SharedPreferences.Editor editor = shared_preference.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(obItemjDownloads);
+        editor.putString("obItemjDownloads", json);
+        editor.apply();
+
+    }
+
+    private void getData() {
+        SharedPreferences shared_preference = getSharedPreferences("shared preference", MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = shared_preference.getString("obItemjDownloads", null);
+        Type type = new TypeToken<ArrayList<ObItemjDownload>>() {
+        }.getType();
+        obItemjDownloads = gson.fromJson(json, type);
+
+        if (obItemjDownloads == null) {
+            obItemjDownloads = new ArrayList<>();
+        }
+
+
+    }
+
     private void setControllers() {
         ConfigDownload();
+
+        getData();
         btnDownload = findViewById(R.id.btn_download);
         listView = findViewById(R.id.lv_download);
-
-        obItemjDownloads = new ArrayList<>();
 
         adapterDownloadList = new AdapterDownloadList(obItemjDownloads, getApplicationContext(), this);
         listView.setAdapter(adapterDownloadList);
@@ -139,6 +173,7 @@ public class MainActivity extends AppCompatActivity implements CommunicationAdap
         this.process = process;
         obItemjDownloads.get(position).setId(id);
         obItemjDownloads.get(position).setPercent(process);
+        Log.d("1321312",position+"");
     }
 
     @Override
@@ -146,20 +181,15 @@ public class MainActivity extends AppCompatActivity implements CommunicationAdap
         this.position = position;
     }
 
-    public class AsyncService extends AsyncTask<Void, Void, Void> {
+    //    private void stopServiceDownload() {
+//        Intent intent = new Intent(this,ServiceDownload.class);
+//        stopService(intent);
+//    }
+    public class AsynService extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            if (obItemjDownloads.size() > 0) {
-                for (int i = 0; i < obItemjDownloads.size(); i++) {
-                    if(obItemjDownloads.get(i).getPercent()<100){
-                        startServiceDownload();
-                        Log.d("12312344",obItemjDownloads.get(i).getPercent()+"");
-                    }else{
-                        stopServiceDownload();
-                    }
-                }
-            }
+            saveData();
             return null;
         }
 
@@ -170,22 +200,17 @@ public class MainActivity extends AppCompatActivity implements CommunicationAdap
         }
     }
 
-    private void stopServiceDownload() {
-        Intent intent = new Intent(this,ServiceDownload.class);
-        stopService(intent);
-    }
-
     public class AsyncGetInfoDownload extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... voids) {
 
             for (int i = 0; i < obItemjDownloads.size(); i++) {
+//                PRDownloader.resume(obItemjDownloads.get(i).getId());
                 PRDownloader.pause(obItemjDownloads.get(i).getId());
             }
-            getPosition(position);
-            getInfoDownload(id, process);
 
+            saveData();
             return null;
         }
 

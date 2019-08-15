@@ -25,7 +25,7 @@ import com.downloader.Status;
 import java.util.List;
 
 
-public class AdapterDownloadList extends BaseAdapter{
+public class AdapterDownloadList extends BaseAdapter {
 
     private List<ObItemjDownload> data;
     private Context context;
@@ -56,14 +56,15 @@ public class AdapterDownloadList extends BaseAdapter{
         btStatus = view.findViewById(R.id.bt_status);
 
         progressBar.setProgress((int) data.get(i).getPercent());
-        if(Status.PAUSED == PRDownloader.getStatus(data.get(i).getId())){
+        if (Status.PAUSED == PRDownloader.getStatus(data.get(i).getId())) {
             btStatus.setEnabled(true);
             btStatus.setText("Resume");
         }
-        if(data.get(i).getPercent()==100){
+        if (data.get(i).getPercent() == 100) {
             btStatus.setEnabled(false);
             btStatus.setText("Completed");
         }
+
         setEvents(progressBar, btStatus, btCancel, i, downloadId, process);
 
         return view;
@@ -71,7 +72,6 @@ public class AdapterDownloadList extends BaseAdapter{
 
 
     private void setEvents(final ProgressBar progressBar, final Button btStatus, final Button btCancel, final int position, final int[] downloadId, final long[] process) {
-
         btCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -90,13 +90,11 @@ public class AdapterDownloadList extends BaseAdapter{
     private void requestDownload(final ProgressBar progressBar, final Button btStatus, final Button btCancel, final int position, final int[] downloadId, final long[] process) {
 
         if (Status.RUNNING == PRDownloader.getStatus(downloadId[0])) {
-            Log.d("123123", PRDownloader.getStatus(downloadId[0]) + "");
             PRDownloader.pause(downloadId[0]);
             return;
         }
 
         if (Status.PAUSED == PRDownloader.getStatus(downloadId[0])) {
-            Log.d("123123", PRDownloader.getStatus(downloadId[0]) + "");
             PRDownloader.resume(downloadId[0]);
             return;
         }
@@ -129,14 +127,13 @@ public class AdapterDownloadList extends BaseAdapter{
                         long progressPercent = progress.currentBytes * 100 / progress.totalBytes;
                         progressBar.setProgress((int) progressPercent);
                         communicationAdapter.getPosition(position);
-                        communicationAdapter.getInfoDownload(downloadId[0], process[0]);
+                        communicationAdapter.getInfoDownload(downloadId[0], progressPercent);
+//
 
                         if (Status.PAUSED == PRDownloader.getStatus(downloadId[0])) {
-//                            check[0] = 0;
                             process[0] = progressPercent;
-                            communicationAdapter.getInfoDownload(downloadId[0], process[0]);
+                            communicationAdapter.getInfoDownload(downloadId[0], progressPercent);
                         }
-
                     }
 
 
@@ -161,7 +158,6 @@ public class AdapterDownloadList extends BaseAdapter{
 
 
     }
-
 
 
     @Override
