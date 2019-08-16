@@ -24,6 +24,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 
+
 public class ServiceDownload extends Service {
     private static final String CHANEL_ID = "Chanel ID";
     public ArrayList<ObItemjDownload> arrayList;
@@ -52,7 +53,7 @@ public class ServiceDownload extends Service {
             arrayList = new ArrayList<>();
         }
         for (int i=0;i<arrayList.size();i++){
-            Log.d("123123",arrayList.get(i).getId()+"");
+//            Log.d("123123",arrayList.get(i).getId()+"");
         }
 
     }
@@ -79,7 +80,6 @@ public class ServiceDownload extends Service {
         if(intent !=null){
             ArrayList<ObItemjDownload> arrayList = intent.getParcelableArrayListExtra("obItemjDownloads");
             getArrayList(arrayList);
-
         }
         getData();
 
@@ -93,11 +93,6 @@ public class ServiceDownload extends Service {
         @Override
         protected Void doInBackground(Void... voids) {
             saveData();
-            for (int i =0;i<arrayList.size();i++){
-                if(arrayList.get(i).getPercent()<100){
-                    Log.d("12344444",arrayList.get(i).getPercent()+"");
-                }
-            }
             return null;
 
         }

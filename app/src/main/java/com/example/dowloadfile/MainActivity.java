@@ -173,7 +173,7 @@ public class MainActivity extends AppCompatActivity implements CommunicationAdap
         this.process = process;
         obItemjDownloads.get(position).setId(id);
         obItemjDownloads.get(position).setPercent(process);
-        Log.d("1321312",position+"");
+//        Log.d("1321312",position+"");
     }
 
     @Override

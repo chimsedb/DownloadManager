@@ -60,6 +60,7 @@ public class AdapterDownloadList extends BaseAdapter {
             btStatus.setEnabled(true);
             btStatus.setText("Resume");
         }
+
         if (data.get(i).getPercent() == 100) {
             btStatus.setEnabled(false);
             btStatus.setText("Completed");
@@ -72,6 +73,16 @@ public class AdapterDownloadList extends BaseAdapter {
 
 
     private void setEvents(final ProgressBar progressBar, final Button btStatus, final Button btCancel, final int position, final int[] downloadId, final long[] process) {
+//        requestDownload(progressBar, btStatus, btCancel, position, downloadId, process);
+        for (int i = 0; i < data.size(); i++) {
+            PRDownloader.pause(data.get(i).getId());
+            if (position == i && data.get(i).getPercent() < 100) {
+                if (Status.PAUSED != PRDownloader.getStatus(data.get(i).getId())) {
+                    requestDownload(progressBar, btStatus, btCancel, position, downloadId, process);
+                }
+
+            }
+        }
         btCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -129,7 +140,6 @@ public class AdapterDownloadList extends BaseAdapter {
                         communicationAdapter.getPosition(position);
                         communicationAdapter.getInfoDownload(downloadId[0], progressPercent);
 //
-
                         if (Status.PAUSED == PRDownloader.getStatus(downloadId[0])) {
                             process[0] = progressPercent;
                             communicationAdapter.getInfoDownload(downloadId[0], progressPercent);
@@ -143,9 +153,10 @@ public class AdapterDownloadList extends BaseAdapter {
                     public void onDownloadComplete() {
                         btStatus.setEnabled(false);
                         btStatus.setText("Completed");
-                        communicationAdapter.getInfoDownload(downloadId[0], 100);
+                        progressBar.setProgress(100);
+                        data.get(position).setPercent(100);
                         Log.d("123123", "Succesful");
-//                        communicationAdapter.removeDownload(position);
+//                        Log.d("123123", positionComplete+"");
                         Toast.makeText(context, "Succesful Download ", Toast.LENGTH_SHORT).show();
                     }
 
