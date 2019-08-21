@@ -3,23 +3,29 @@ package com.example.dowloadfile;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class ObItemjDownload implements Parcelable {
+public class ObItemjDownload implements Parcelable{
 
     private String url;
     private int id;
     private long percent;
+    private String dir;
+    private long size;
     //Contructor
 
-    public ObItemjDownload(String url, int id, long percent) {
+    public ObItemjDownload(String url, int id, long percent, String dir, long size) {
         this.url = url;
         this.id = id;
         this.percent = percent;
+        this.dir = dir;
+        this.size = size;
     }
 
     protected ObItemjDownload(Parcel in) {
         url = in.readString();
         id = in.readInt();
         percent = in.readLong();
+        dir = in.readString();
+        size = in.readLong();
     }
 
     public static final Creator<ObItemjDownload> CREATOR = new Creator<ObItemjDownload>() {
@@ -33,6 +39,14 @@ public class ObItemjDownload implements Parcelable {
             return new ObItemjDownload[size];
         }
     };
+
+    public long getSize() {
+        return size;
+    }
+
+    public void setSize(long size) {
+        this.size = size;
+    }
 
     //Getter and Setter
     public String getUrl() {
@@ -59,6 +73,13 @@ public class ObItemjDownload implements Parcelable {
         this.percent = percent;
     }
 
+    public String getDir() {
+        return dir;
+    }
+
+    public void setDir(String dir) {
+        this.dir = dir;
+    }
 
     @Override
     public int describeContents() {
@@ -70,5 +91,7 @@ public class ObItemjDownload implements Parcelable {
         parcel.writeString(url);
         parcel.writeInt(id);
         parcel.writeLong(percent);
+        parcel.writeString(dir);
+        parcel.writeLong(size);
     }
 }

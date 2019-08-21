@@ -74,7 +74,7 @@ public class ServiceDownload extends Service {
         Intent intentService = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intentService, 0);
         Notification notification = new NotificationCompat.Builder(this, CHANEL_ID)
-                .setSmallIcon(R.drawable.ic_launcher_background)
+//                .setSmallIcon(R.drawable.ic_launcher_background)
                 .setContentIntent(pendingIntent)
                 .build();
         if(intent !=null){
